@@ -1,0 +1,7 @@
+streamlit
+pandas
+openpyxl
+langchain-google-genai
+langgraph
+mcp
+langchain-mcp-adapters
