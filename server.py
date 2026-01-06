@@ -2,35 +2,31 @@ from mcp.server.fastmcp import FastMCP
 import pandas as pd
 import os
 
+# Initialize FastMCP
 mcp = FastMCP("FinanceServer")
 DATA_FILE = "transaction_data.csv"
 
 @mcp.tool()
-def get_columns() -> str:
-    """Returns the columns and types of the loaded data."""
+def get_data_info() -> str:
+    """Returns columns and types of the financial data."""
     if not os.path.exists(DATA_FILE):
-        return "No data loaded."
+        return "Data file not found."
     df = pd.read_csv(DATA_FILE)
-    return f"Columns: {df.columns.tolist()} | Sample Types: {df.dtypes.to_dict()}"
+    return f"Columns: {df.columns.tolist()}"
 
 @mcp.tool()
 def run_analysis(python_code: str) -> str:
-    """Executes Pandas code on 'df' and returns 'final_result'."""
+    """Executes Pandas code and returns 'final_result'."""
     if not os.path.exists(DATA_FILE):
-        return "Error: Please upload a file first."
-    
+        return "Error: No data."
     df = pd.read_csv(DATA_FILE)
-    # Ensure Date column is actually datetime
-    if 'Date' in df.columns:
-        df['Date'] = pd.to_datetime(df['Date'])
-        
     local_vars = {'df': df}
     try:
-        # Securely execute the LLM's logic
         exec(python_code, {}, local_vars)
-        return str(local_vars.get('final_result', "No 'final_result' variable was defined."))
+        return str(local_vars.get('final_result', "Done"))
     except Exception as e:
-        return f"Calculation Error: {str(e)}"
+        return f"Error: {e}"
 
 if __name__ == "__main__":
+    # show_banner=False is vital for stdio transport
     mcp.run(transport="stdio")
